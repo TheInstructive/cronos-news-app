@@ -5,6 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import Announcements from './Announcements';
 import Newsletter from './Newsletter';
 import * as Font from 'expo-font';
+import Notification from './Notification';
 
 const MyTheme = {
   dark: false,
@@ -56,6 +57,23 @@ export default function App() {
   return (
     <NavigationContainer theme={MyTheme}>
       <Stack.Navigator>
+
+        <Stack.Screen 
+        name="Notification" 
+        component={Notification} 
+        options={{
+          headerTitle: (props) => <LogoTitle {...props} />,
+          headerTitleAlign:'center',
+          headerStyle: {
+            backgroundColor: '#002d74',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+        />
+
         <Stack.Screen 
         name="Newsletter" 
         component={Newsletter} 
