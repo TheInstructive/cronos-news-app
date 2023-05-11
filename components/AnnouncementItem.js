@@ -1,7 +1,8 @@
 import { View, Text, StyleSheet, Image, Linking, Dimensions, TouchableOpacity } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ImageModal from 'react-native-image-modal';
 import { Video, ResizeMode } from 'expo-av';
+import FastImage from 'react-native-fast-image'
 
 const { width, height } = Dimensions.get('window');
 
@@ -181,7 +182,7 @@ export default function AnnouncementItem(props) {
   return (
     <>
     <View style={styles.newsTable}>
-        <Image style={styles.colImage} source={props.collectionImage} alt="Collection"></Image>
+        <FastImage source={{ uri: props.collectionImage, cache: 'immutable' }} style={styles.colImage}/>
         <Text numberOfLines={1} ellipsizeMode="tail" style={styles.newsAuthor}>{props.announcementAuthor}</Text>
         <Text numberOfLines={2} ellipsizeMode="tail" style={styles.annouDate}>{props.announcementDate}</Text>
         <TouchableOpacity activeOpacity={0.9} style={styles.showButton} onPress={announcementDetails}><Text style={styles.showButtonText} >{showDetails ? "HIDE" : "SHOW" }</Text></TouchableOpacity>

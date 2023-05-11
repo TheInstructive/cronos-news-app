@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "495571553050",
+    "project_id": "cronos-news-4b3ea",
+    "storage_bucket": "cronos-news-4b3ea.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:495571553050:android:0582a8c57080fa305dbaa3",
+        "android_client_info": {
+          "package_name": "news.cronos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "495571553050-rjko35luae9psafu5gbga57iqrp27ugm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-84wU4zlOiYF7ShcZ69_x5m1gh9Q2_Q0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "495571553050-rjko35luae9psafu5gbga57iqrp27ugm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

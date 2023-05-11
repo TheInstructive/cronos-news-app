@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, Dimensions, TouchableOpacity} from 'react-native'
 import { useRoute } from '@react-navigation/native';
-import { bySlug } from './collections';
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import AnnouncementItem from './components/AnnouncementItem';
+import messaging from '@react-native-firebase/messaging';
 
 import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
@@ -16,33 +16,80 @@ const [currentDetailsId, setCurrentDetailsId] = useState(null);
 const route = useRoute();
 const { slug } = route.params;
 
-const collection = bySlug(slug);
 const [data, setData] = useState(null);
 const [page, setPage] = useState(0);
+
+const [isSubscribed, setIsSubscribed] = useState(false);
+const [collection, setCollection] = useState(null);
+
+
+useEffect(() => {
+  fetch('https://collections.cronos.news/index.json')
+    .then((response) => response.json())
+    .then((data) => {
+      setCollection(data.filter(col => col.slug === slug)[0]);
+    })
+    .catch((error) => console.log(error));
+}, []);
+
+
+useEffect(() => {
+  if (collection) {
+    fetch(`https://mellifluous-centaur-e6602b.netlify.app/news?id=${collection.id}&page=${page}`)
+      .then(response => response.json())
+      .then(data => setData(data));
+      checkSubscribe()
+  }
+}, [collection, page]);
+
+function checkSubscribe(){
+  fetch(`https://mellifluous-centaur-e6602b.netlify.app/topics?token=ceBuB-RVSIa54jC9NAFEgs:APA91bEIVwtoy99M92O_x3JSUhX9-sOu0bLvQpktcF9XCXHFaRfeQ7_JlhmBROSaRVCDVVLw71e0rIetsgmK4L43noca2f1Vdkkl89332Irs3tt0sHDQnHGpO7NSAYTlU1JkncOIkKqa`)
+  .then(response => response.json())
+  .then(data => setIsSubscribed(data.some(col => col === collection.id)));
+}
+
+const onSubscribeButtonClick = async () => {
+  try {
+    await messaging().subscribeToTopic(collection.id);
+    checkSubscribe()
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const onUnsubscribeButtonClick = async () => {
+  try {
+    await messaging().unsubscribeFromTopic(collection.id);
+    checkSubscribe()
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 function getDate(item) {
     return item.timestamp ? new Date(item.timestamp).toLocaleString() : "-";
   }
 
-useEffect(() => {
-    fetch(`https://mellifluous-centaur-e6602b.netlify.app/news?id=${collection.id}&page=${page}`)
-      .then(response => response.json())
-      .then(data => setData(data));
-  }, [collection.id, page]);
 
 const handleDetailsToggle = (announcementId) => {
     setCurrentDetailsId(currentDetailsId === announcementId ? null : announcementId);
 };
 
-  const scrollRef = useRef();
 
 
+
+if (collection){
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView ref={scrollRef} horizontal={false} style={styles.scrollView}>
+      <ScrollView horizontal={false} style={styles.scrollView}>
 
       <View style={styles.newsHeader}>
       <Text numberOfLines={0} ellipsizeMode="tail" style={styles.newsTitle}>News From <Text style={styles.newsTitleBold}>{collection.name}</Text></Text>
+      {isSubscribed ? (
+      <TouchableOpacity activeOpacity={0.9} style={styles.followButton} onPress={onUnsubscribeButtonClick}><Text style={styles.prevButtonText}> Unfollow </Text></TouchableOpacity>
+      ):
+      <TouchableOpacity activeOpacity={0.9} style={styles.followButton} onPress={onSubscribeButtonClick}><Text style={styles.prevButtonText}> Follow </Text></TouchableOpacity>
+      }
       </View>
 
       <BannerAd
@@ -58,7 +105,7 @@ const handleDetailsToggle = (announcementId) => {
             data.map((announcement) => (
                 <AnnouncementItem
                 key = {announcement.id}
-                collectionImage = {collection.image}
+                collectionImage = {`https://collections.cronos.news/${collection.image}`}
                 announcementAuthor = {announcement.author.tag}
                 announcementDate = {getDate(announcement)}
                 annouImages = {announcement.media}
@@ -70,7 +117,7 @@ const handleDetailsToggle = (announcementId) => {
         )}
 
       {data && data.length  < 1 && 
-          <Text>NO ANNOUNCEMENTS YET</Text>
+          <Text style={styles.noAnnou}>NO ANNOUNCEMENTS YET</Text>
       }
       
       </View>
@@ -80,9 +127,18 @@ const handleDetailsToggle = (announcementId) => {
       <TouchableOpacity disabled={data && data.length  < 10} activeOpacity={0.9} style={[styles.nextButton, data && data.length < 10 && styles.disabledButton]} onPress={() => setPage(page + 1)}><Text style={styles.nextButtonText}> Next Page </Text></TouchableOpacity>
       </View>
 
+      <BannerAd
+        unitId={adUnitId}
+        size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+        requestOptions={{
+          requestNonPersonalizedAdsOnly: true,
+        }}
+      />
+
       </ScrollView>
       </SafeAreaView>
   )
+}
 }
 
 const styles = StyleSheet.create({
@@ -150,6 +206,13 @@ const styles = StyleSheet.create({
       padding:5,
       backgroundColor:'#002d74',
       marginRight:10
+    },
+
+    noAnnou:{
+      fontFamily:'medium',
+      fontSize:18,
+      marginTop:5,
+      padding:10,
     }
 
   });
