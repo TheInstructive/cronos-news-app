@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import Announcements from './Announcements';
 import Newsletter from './Newsletter';
+import AnnouncementDetail from './components/AnnouncementDetail';
 import * as Font from 'expo-font';
 
 const MyTheme = {
@@ -87,12 +88,25 @@ export default function App() {
           },
         }}
         />
+        <Stack.Screen 
+        name="AnnouncementDetail" 
+        component={AnnouncementDetail} 
+        initialParams={{slug: 'default-slug', announcementID: 'announcement-id'}} 
+        options={{
+          headerTitle: (props) => <LogoTitle {...props} />,
+          headerTitleAlign:'center',
+          headerStyle: {
+            backgroundColor: '#002d74',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+        />
 
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-
-});

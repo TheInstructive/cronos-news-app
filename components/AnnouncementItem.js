@@ -2,155 +2,15 @@ import { View, Text, StyleSheet, Image, Linking, Dimensions, TouchableOpacity } 
 import React, { useEffect, useRef, useState } from 'react'
 import ImageModal from 'react-native-image-modal';
 import { Video, ResizeMode } from 'expo-av';
+import { convertNews } from '../ConvertNews';
+import { useNavigation } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window');
 
-const timestampFormats = {
-    'D': { dateStyle: 'long' },
-    't': { timeStyle: 'short' },
-    'd': { dateStyle: 'short' },
-    'T': { timeStyle: 'medium' },
-    'R': { style: 'long', numeric: 'auto' },
-    'f': { dateStyle: 'long', timeStyle: 'short' },
-    'F': { dateStyle: 'full', timeStyle: 'short' },
-};
-
-function automaticRelativeDifference(timestamp) {
-    const diff = -((Date.now() - timestamp)/1000)|0;
-    const absDiff = Math.abs(diff);
-    if (absDiff > 86400*30*10) {
-        return { duration: Math.round(diff/(86400*365)), unit: 'years' };
-    }
-    if (absDiff > 86400*25) {
-        return { duration: Math.round(diff/(86400*30)), unit: 'months' };
-    }
-    if (absDiff > 3600*21) {
-        return { duration: Math.round(diff/86400), unit: 'days' };
-    }
-    if (absDiff > 60*44) {
-        return { duration: Math.round(diff/3600), unit: 'hours' };
-    }
-    if (absDiff > 30) {
-        return { duration: Math.round(diff/60), unit: 'minutes' };
-    }
-    return { duration: diff, unit: 'seconds' };
-}
-
-function convertTimestamp(type, timestamp) {
-    timestamp *= 1000;
-
-    if (type === 'R') {
-        const formatter = new Intl.RelativeTimeFormat(navigator.language || 'en', timestampFormats[type] || {});
-        const format = automaticRelativeDifference(timestamp);
-        return formatter.format(format.duration, format.unit);
-    }
-    
-    const formatter = new Intl.DateTimeFormat(navigator.language || 'en', timestampFormats[type] || {});
-    return formatter.format(new Date(timestamp));
-}
-
-
-function convertNewsNode(node) {
-    if (typeof(node) === 'string') {
-        return node;
-    }
-
-    if (node.type === 'text') {
-        return node.content;
-    }
-
-    if (node.type === 'twemoji') {
-        return node.name;
-    }
-
-    if (node.type === 'br') {
-        return <Text>{"\n"}</Text>;
-    }
-
-    if (node.type === 'user') {
-        return <Text style={styles.user}>@{node.tag}</Text>;
-    }
-
-    if (node.type === 'here' || node.type === 'everyone') {
-        return <Text style={styles.user}>@{node.type}</Text>;
-    }
-
-    if (node.type === 'role') {
-        return <Text style={[styles.role, {color: node.color, fontFamily:'medium'}]}>@{node.name}</Text>;
-    }
-
-    if (node.type === 'channel') {
-        return <Text style={styles.channel}>#{node.name}</Text>;
-    }
-
-    if (node.type === 'emoji') {
-        return <Image source={{uri: node.url}} style={{width: 16, height: 16}} />;
-    }
-
-    if (node.type === 'codeBlock') {
-        return <Text style={styles.code}>{convertNews(node.content)}</Text>;
-    }
-
-    if (node.type === 'blockQuote') {
-        return (
-            <View style={styles.blockQuote}>
-                <Text style={styles.quote}>{convertNews(node.content)}</Text>
-            </View>
-        );
-    }
-
-    if (node.type === 'inlineCode') {
-        return <Text style={styles.code}>{convertNews(node.content)}</Text>;
-    }
-
-    if (node.type === 'em') {
-        return <Text style={styles.em}>{convertNews(node.content)}</Text>;
-    }
-
-    if (node.type === 'strong') {
-        return <Text style={styles.strong}>{convertNews(node.content)}</Text>;
-    }
-
-    if (node.type === 'strikethrough') {
-        return <Text style={styles.strikethrough}>{convertNews(node.content)}</Text>;
-    }
-
-    if (node.type === 'underline') {
-        return <Text style={styles.underline}>{convertNews(node.content)}</Text>;
-    }
-
-    if (node.type === 'spoiler') {
-        return <Text style={styles.spoiler}>{convertNews(node.content)}</Text>;
-    }
-
-    if (node.type === 'url' || node.type === 'autolink') {
-        return <Text style={styles.link} onPress={() => Linking.openURL(node.target)}>{convertNews(node.content)}</Text>;
-    }
-
-    if (node.type === 'timestamp') {
-        return <Text style={styles.timestamp} title={new Date(node.timestamp * 1000).toLocaleString()}>{convertTimestamp(node.format, node.timestamp)}</Text>;
-    }
-
-    if (node.content) {
-        return convertNewsNode(node.content);
-    }
-
-    console.warn("parser missing node:", node);
-
-    return "<ERROR>";
-}
-
-
-function convertNews(nodes) {
-    if (typeof(nodes) === 'string') {
-        return nodes;
-    }
-
-    return nodes.flatMap((node, i) => <Text key={i}>{convertNewsNode(node)}</Text>);
-}
-
-
 export default function AnnouncementItem(props) {
+    const annouid = props.announcementID
+    const collslug = props.colSlug
+    const navigation = useNavigation();
     const [showDetails, setshowDetails] = useState(false)
     const [imageNum, setimageNum] = useState(0)
 
@@ -173,10 +33,16 @@ export default function AnnouncementItem(props) {
         setshowDetails(props.isDetailsShown);
       }, [props.isDetailsShown]);
     
-      const announcementDetails = () => {
+    const announcementDetails = () => {
         props.onDetailsToggle();
         setshowDetails(!showDetails);
-      };
+    };
+    
+
+    const goDetails = () => {
+        navigation.navigate('AnnouncementDetail', { annouid: annouid, collslug: collslug });
+    };
+      
       
   return (
     <>
@@ -185,6 +51,7 @@ export default function AnnouncementItem(props) {
         <Text numberOfLines={1} ellipsizeMode="tail" style={styles.newsAuthor}>{props.announcementAuthor}</Text>
         <Text numberOfLines={2} ellipsizeMode="tail" style={styles.annouDate}>{props.announcementDate}</Text>
         <TouchableOpacity activeOpacity={0.9} style={styles.showButton} onPress={announcementDetails}><Text style={styles.showButtonText} >{showDetails ? "HIDE" : "SHOW" }</Text></TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.9} style={styles.linkButton} onPress={goDetails}><Text style={styles.showButtonText} >🔗</Text></TouchableOpacity>
     </View>
 
         {showDetails && 
@@ -313,6 +180,12 @@ const styles = StyleSheet.create({
 
     showButton:{
         backgroundColor:'#002d74',
+        marginRight:20,
+        padding:10
+    },
+
+    linkButton:{
+        backgroundColor:'#ebebeb',
         marginRight:20,
         padding:10
     },

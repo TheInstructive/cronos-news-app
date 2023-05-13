@@ -65,6 +65,8 @@ const handleDetailsToggle = (announcementId) => {
                 announcementDesc = {announcement.content}
                 isDetailsShown = {currentDetailsId === announcement.id}
                 onDetailsToggle = {() => handleDetailsToggle(announcement.id)}
+                announcementID = {announcement.id}
+                colSlug = {collection.slug}
                 ></AnnouncementItem>
             ))
         )}
