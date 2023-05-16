@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Image } from 'react-native';
+import { View, Image } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import Announcements from './Announcements';
 import Newsletter from './Newsletter';
+import AnnouncementDetail from './components/AnnouncementDetail';
 import * as Font from 'expo-font';
+import messaging from '@react-native-firebase/messaging';
 
 const MyTheme = {
   dark: false,
@@ -28,9 +30,44 @@ function LogoTitle() {
 }
 
 const Stack = createNativeStackNavigator();
+const navigationRef = createNavigationContainerRef();
 
 export default function App() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [navReady, setNavReady] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [initialRoute, setInitialRoute] = useState("Newsletter");
+  const [dataAnnouncementID, setDataAnnouncementID] = useState();
+  const [dataCollectionID, setDataCollectionID] = useState();
+
+  useEffect(() => {
+    messaging().onNotificationOpenedApp(remoteMessage => {
+      console.log('Notification caused app to open from background state:', remoteMessage.notification);
+      console.log(remoteMessage.data.announcementID)
+      console.log(remoteMessage.data.collectionID)
+      console.log(remoteMessage.messageId)
+      setDataAnnouncementID(remoteMessage.data.announcementID)
+      setDataCollectionID(remoteMessage.data.collectionID)
+    });
+
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        if (remoteMessage) {
+          console.log('Notification caused app to open from quit state:', remoteMessage.notification);
+          setInitialRoute('AnnouncementDetail');
+        }
+        setLoading(false);
+      });
+    }, []);
+
+
+    useEffect(() => {
+      if(navReady && dataAnnouncementID && dataCollectionID){
+          navigationRef.navigate('AnnouncementDetail', { annouid: dataAnnouncementID, colid: dataCollectionID });
+      }
+    }, [navReady, dataAnnouncementID, dataCollectionID]);
+
 
   async function loadFonts() {
     await Font.loadAsync({
@@ -49,13 +86,13 @@ export default function App() {
     loadFonts();
   }, []);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || loading) {
     return <View />; // Render a blank view while fonts are loading
   }
 
   return (
-    <NavigationContainer theme={MyTheme}>
-      <Stack.Navigator>
+    <NavigationContainer onReady={() => setNavReady(true)} ref={navigationRef} theme={MyTheme}>
+      <Stack.Navigator initialRouteName={initialRoute}>
         <Stack.Screen 
         name="Newsletter" 
         component={Newsletter} 
@@ -87,12 +124,25 @@ export default function App() {
           },
         }}
         />
+        <Stack.Screen 
+        name="AnnouncementDetail" 
+        component={AnnouncementDetail} 
+        initialParams={{colid: 'default-slug', announcementID: 'announcement-id'}} 
+        options={{
+          headerTitle: (props) => <LogoTitle {...props} />,
+          headerTitleAlign:'center',
+          headerStyle: {
+            backgroundColor: '#002d74',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+        />
 
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-
-});

@@ -53,3 +53,6 @@ const collections = [
     return collections.filter(col => col.slug === slug)[0];
   }
   
+  export function byID(id){
+    return collections.filter(col => col.id === id)[0];
+  }
