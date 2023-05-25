@@ -85,10 +85,14 @@ if (collection){
 
       <View style={styles.newsHeader}>
       <Text numberOfLines={0} ellipsizeMode="tail" style={styles.newsTitle}>News From <Text style={styles.newsTitleBold}>{collection.name}</Text></Text>
+      {collection.canSubscribe &&
+      <>
       {isSubscribed ? (
       <TouchableOpacity activeOpacity={0.9} style={styles.followButton} onPress={onUnsubscribeButtonClick}><Text style={styles.prevButtonText}> Unfollow </Text></TouchableOpacity>
       ):
       <TouchableOpacity activeOpacity={0.9} style={styles.followButton} onPress={onSubscribeButtonClick}><Text style={styles.prevButtonText}> Follow </Text></TouchableOpacity>
+      }
+      </>
       }
       </View>
 
@@ -112,6 +116,9 @@ if (collection){
                 announcementDesc = {announcement.content}
                 isDetailsShown = {currentDetailsId === announcement.id}
                 onDetailsToggle = {() => handleDetailsToggle(announcement.id)}
+                announcementID = {announcement.id}
+                colID = {collection.id}
+                whichpage = {page}
                 ></AnnouncementItem>
             ))
         )}
