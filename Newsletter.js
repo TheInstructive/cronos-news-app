@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Image, Dimensions,ScrollView, SafeAreaView, TouchableOpacity} from 'react-native';
-import collections from './collections';
+import { StyleSheet, Text, View, TextInput, Dimensions,ScrollView, SafeAreaView, TouchableOpacity} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Checkbox from 'expo-checkbox';
+import FastImage from 'react-native-fast-image'
 
 import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
@@ -21,6 +21,7 @@ export default function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [filteredCollections, setFilteredCollections] = useState([]);
+  const [collections, setCollections] = useState([]);
 
   const handleSearch = (searchText) => {
     setSearchTerm(searchText.toLowerCase());
@@ -35,6 +36,15 @@ export default function App() {
   };
 
   useEffect(() => {
+    fetch('https://collections.cronos.news/index.json')
+      .then((response) => response.json())
+      .then((data) => {
+        setCollections(data);
+      })
+      .catch((error) => console.log(error));
+  }, []);
+
+  useEffect(() => {
     const filteredBySearch = collections.filter((collection) =>
       collection.name.toLowerCase().includes(searchTerm)
     );
@@ -47,7 +57,7 @@ export default function App() {
         : filteredBySearch;
   
     setFilteredCollections(filteredByTags);
-  }, [searchTerm, selectedTags]);
+  }, [searchTerm, selectedTags, collections]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -109,8 +119,11 @@ export default function App() {
           {filteredCollections.map((collection) => (
             <View style={styles.collectionItem} key={collection.name}>
               <Text style={styles.collectionNameText}>{collection.name}</Text>
-              <Image 
-              source={collection.image} 
+              <FastImage
+              source={{
+                uri: `https://collections.cronos.news/${collection.image}`,
+                cache: 'immutable'
+              }} 
               style={{width: 100, height: 100}}
               />
               <TouchableOpacity activeOpacity={0.9} style={styles.selectButton} onPress={() => handlePress(collection.slug)}><Text style={styles.selectButtonText}> SELECT </Text></TouchableOpacity>
