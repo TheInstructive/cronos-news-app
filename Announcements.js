@@ -6,7 +6,8 @@ import messaging from '@react-native-firebase/messaging';
 
 import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
-const adUnitId = __DEV__ ? TestIds.BANNER : 'ca-app-pub-xxxxxxxxxxxxx/yyyyyyyyyyyyyy';
+const collection_top = __DEV__ ? TestIds.BANNER : 'ca-app-pub-6849324531484948/3483761816';
+const collection_bot = __DEV__ ? TestIds.BANNER : 'ca-app-pub-6849324531484948/9448219145';
 
 const { width, height } = Dimensions.get('window');
 
@@ -48,23 +49,20 @@ function checkSubscribe(){
   .then(data => setIsSubscribed(data.some(col => col === collection.id)));
 }
 
-const onSubscribeButtonClick = async () => {
+const toggleSubscription = async () => {
   try {
-    await messaging().subscribeToTopic(collection.id);
-    checkSubscribe()
-  } catch (error) {
-    console.log(error);
-  }
-};
+    if (isSubscribed) {
+      await messaging().unsubscribeFromTopic(collection.id);
+    } else {
+      await messaging().subscribeToTopic(collection.id);
+    }
 
-const onUnsubscribeButtonClick = async () => {
-  try {
-    await messaging().unsubscribeFromTopic(collection.id);
-    checkSubscribe()
+    setIsSubscribed(!isSubscribed);
   } catch (error) {
     console.log(error);
   }
-};
+}
+
 
 function getDate(item) {
     return item.timestamp ? new Date(item.timestamp).toLocaleString() : "-";
@@ -88,16 +86,16 @@ if (collection){
       {collection.canSubscribe &&
       <>
       {isSubscribed ? (
-      <TouchableOpacity activeOpacity={0.9} style={styles.followButton} onPress={onUnsubscribeButtonClick}><Text style={styles.prevButtonText}> Unfollow </Text></TouchableOpacity>
+      <TouchableOpacity activeOpacity={0.9} style={styles.followButton} onPress={toggleSubscription}><Text style={styles.prevButtonText}> Unfollow </Text></TouchableOpacity>
       ):
-      <TouchableOpacity activeOpacity={0.9} style={styles.followButton} onPress={onSubscribeButtonClick}><Text style={styles.prevButtonText}> Follow </Text></TouchableOpacity>
+      <TouchableOpacity activeOpacity={0.9} style={styles.followButton} onPress={toggleSubscription}><Text style={styles.prevButtonText}> Follow </Text></TouchableOpacity>
       }
       </>
       }
       </View>
 
       <BannerAd
-        unitId={adUnitId}
+        unitId={collection_top}
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
         requestOptions={{
           requestNonPersonalizedAdsOnly: true,
@@ -130,12 +128,12 @@ if (collection){
       </View>
 
       <View style={styles.pagination}>
-      <TouchableOpacity disabled={page === 0} activeOpacity={0.9} style={[styles.prevButton, page === 0 && styles.disabledButton]} onPress={() => setPage(page - 1)}><Text style={styles.prevButtonText}> Previous Page </Text></TouchableOpacity>
-      <TouchableOpacity disabled={data && data.length  < 10} activeOpacity={0.9} style={[styles.nextButton, data && data.length < 10 && styles.disabledButton]} onPress={() => setPage(page + 1)}><Text style={styles.nextButtonText}> Next Page </Text></TouchableOpacity>
+      <TouchableOpacity disabled={page === 0} activeOpacity={0.9} style={[styles.prevButton, page === 0 && styles.disabledButton]} onPress={() => setPage(page - 1)}><Text style={styles.prevButtonText}> NEXT </Text></TouchableOpacity>
+      <TouchableOpacity disabled={data && data.length  < 10} activeOpacity={0.9} style={[styles.nextButton, data && data.length < 10 && styles.disabledButton]} onPress={() => setPage(page + 1)}><Text style={styles.nextButtonText}> PREVIOUS </Text></TouchableOpacity>
       </View>
 
       <BannerAd
-        unitId={adUnitId}
+        unitId={collection_bot}
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
         requestOptions={{
           requestNonPersonalizedAdsOnly: true,

@@ -8,7 +8,7 @@ import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads'
 
 
 const { width, height } = Dimensions.get('window');
-const adUnitId = __DEV__ ? TestIds.BANNER : 'ca-app-pub-xxxxxxxxxxxxx/yyyyyyyyyyyyyy';
+const details_ad = __DEV__ ? TestIds.BANNER : 'ca-app-pub-6849324531484948/5918353464';
 
 
 export default function AnnouncementDetail() {
@@ -118,7 +118,7 @@ if(collection && data){
             </View>
             
             <BannerAd
-                  unitId={adUnitId}
+                  unitId={details_ad}
                   size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
                   requestOptions={{
                     requestNonPersonalizedAdsOnly: true,
