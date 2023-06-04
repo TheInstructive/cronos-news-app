@@ -3,6 +3,7 @@ import { useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react'
 import AnnouncementItem from './components/AnnouncementItem';
 import messaging from '@react-native-firebase/messaging';
+import {fetchNewsData, fetchCollectionData} from './FetchData'
 
 import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
@@ -25,28 +26,44 @@ const [collection, setCollection] = useState(null);
 
 
 useEffect(() => {
-  fetch('https://collections.cronos.news/index.json')
-    .then((response) => response.json())
-    .then((data) => {
-      setCollection(data.filter(col => col.slug === slug)[0]);
-    })
-    .catch((error) => console.log(error));
+  const fetchCollection = async () => {
+    try {
+      const collectionData = await fetchCollectionData();
+      setCollection(collectionData.filter(col => col.slug === slug)[0]);
+    } catch (error) {
+      console.log(error)
+    }
+  };
+
+  fetchCollection();
 }, []);
 
 
 useEffect(() => {
-  if (collection) {
-    fetch(`https://mellifluous-centaur-e6602b.netlify.app/news?id=${collection.id}&page=${page}`)
-      .then(response => response.json())
-      .then(data => setData(data));
+  const fetchNews = async () => {
+    try {
+      const newsData = await fetchNewsData(collection.id, page);
+      setData(newsData);
       checkSubscribe()
-  }
+
+    } catch (error) {
+      console.log(error)
+    }
+  };
+
+   fetchNews();
 }, [collection, page]);
 
-function checkSubscribe(){
-  fetch(`https://mellifluous-centaur-e6602b.netlify.app/topics?token=ceBuB-RVSIa54jC9NAFEgs:APA91bEIVwtoy99M92O_x3JSUhX9-sOu0bLvQpktcF9XCXHFaRfeQ7_JlhmBROSaRVCDVVLw71e0rIetsgmK4L43noca2f1Vdkkl89332Irs3tt0sHDQnHGpO7NSAYTlU1JkncOIkKqa`)
-  .then(response => response.json())
-  .then(data => setIsSubscribed(data.some(col => col === collection.id)));
+
+async function checkSubscribe() {
+  try {
+    const userToken = await messaging().getToken();
+    fetch(`https://mellifluous-centaur-e6602b.netlify.app/topics?token=${userToken}`)
+      .then(response => response.json())
+      .then(data => setIsSubscribed(data.some(col => col === collection.id)));
+  } catch (error) {
+    console.log('Error occurred:', error);
+  }
 }
 
 const toggleSubscription = async () => {
@@ -155,7 +172,7 @@ const styles = StyleSheet.create({
       fontSize:18,
       marginTop:5,
       padding:10,
-      maxWidth:320,
+      maxWidth:width/1.3,
     },
 
     newsTitleBold:{
@@ -210,7 +227,7 @@ const styles = StyleSheet.create({
     followButton:{
       padding:5,
       backgroundColor:'#002d74',
-      marginRight:10
+      marginRight:10,
     },
 
     noAnnou:{

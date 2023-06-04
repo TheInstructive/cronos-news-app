@@ -64,7 +64,7 @@ export default function App() {
 
     useEffect(() => {
       if(navReady && dataAnnouncementID && dataCollectionID){
-          navigationRef.navigate('AnnouncementDetail', { annouid: dataAnnouncementID, colid: dataCollectionID });
+          navigationRef.navigate('AnnouncementDetail', { annouid: dataAnnouncementID, colid: dataCollectionID, apage: 0});
       }
     }, [navReady, dataAnnouncementID, dataCollectionID]);
 

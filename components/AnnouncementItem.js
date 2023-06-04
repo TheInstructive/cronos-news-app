@@ -48,13 +48,15 @@ export default function AnnouncementItem(props) {
       
   return (
     <>
-    <View style={styles.newsTable}>
+        <View style={styles.newsTable}>
         <FastImage source={{ uri: props.collectionImage, cache: 'immutable' }} style={styles.colImage}/>
+        <View style={styles.annouheader}>
         <Text numberOfLines={1} ellipsizeMode="tail" style={styles.newsAuthor}>{props.announcementAuthor}</Text>
         <Text numberOfLines={2} ellipsizeMode="tail" style={styles.annouDate}>{props.announcementDate}</Text>
+        </View>
         <TouchableOpacity activeOpacity={0.9} style={styles.showButton} onPress={announcementDetails}><Text style={styles.showButtonText} >{showDetails ? "HIDE" : "SHOW" }</Text></TouchableOpacity>
         <TouchableOpacity activeOpacity={0.9} style={styles.linkButton} onPress={goDetails}><Text style={styles.showButtonText} >🔗</Text></TouchableOpacity>
-    </View>
+        </View>
 
         {showDetails && 
 
@@ -169,29 +171,28 @@ const styles = StyleSheet.create({
         fontFamily:'regular',
     },
 
+    annouheader:{
+        maxWidth:120
+    },
+
     newsAuthor:{
         fontFamily:'regular',
-        width:90,
-        marginLeft:10,
     },
 
     annouDate:{
         fontFamily:'regular',
-        width:100,
-        textAlign:'center',
-        marginRight:10
+        fontSize:11
     },
 
     showButton:{
         backgroundColor:'#002d74',
-        marginRight:20,
         padding:10
     },
 
     linkButton:{
         backgroundColor:'#ebebeb',
         marginRight:20,
-        padding:10
+        padding:10,
     },
 
     showButtonText:{

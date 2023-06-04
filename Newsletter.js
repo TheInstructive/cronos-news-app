@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TextInput, Dimensions,ScrollView, SafeAreaView,
 import { useNavigation } from '@react-navigation/native';
 import Checkbox from 'expo-checkbox';
 import FastImage from 'react-native-fast-image'
+import {fetchCollectionData} from './FetchData'
 
 import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
@@ -37,13 +38,17 @@ export default function App() {
   };
 
   useEffect(() => {
-    fetch('https://collections.cronos.news/index.json')
-      .then((response) => response.json())
-      .then((data) => {
-        setCollections(data);
-        setAvailableTags([...data.reduce((ret, col) => new Set([...ret, ...col.tag.split(', ')]), new Set())]);
-      })
-      .catch((error) => console.log(error));
+    const fetchCollection = async () => {
+      try {
+        const collectionData = await fetchCollectionData();
+        setCollections(collectionData);
+        setAvailableTags([...collectionData.reduce((ret, col) => new Set([...ret, ...col.tag.split(', ')]), new Set())]);
+      } catch (error) {
+        console.log(error)
+      }
+    };
+  
+    fetchCollection();
   }, []);
 
   useEffect(() => {
@@ -88,7 +93,8 @@ export default function App() {
     </View>
 
         <View style={styles.collectionItems}> 
-          {filteredCollections.map((collection) => (
+          {filteredCollections.map((collection, idx) => (
+            <TouchableOpacity key={idx} activeOpacity={0.9} onPress={() => handlePress(collection.slug)}>
             <View style={styles.collectionItem} key={collection.name}>
               <Text style={styles.collectionNameText}>{collection.name}</Text>
               <FastImage
@@ -98,8 +104,11 @@ export default function App() {
               }} 
               style={{width: 100, height: 100}}
               />
-              <TouchableOpacity activeOpacity={0.9} style={styles.selectButton} onPress={() => handlePress(collection.slug)}><Text style={styles.selectButtonText}> SELECT </Text></TouchableOpacity>
+              <View style={styles.selectButton}>
+              <Text style={styles.selectButtonText}> SELECT </Text>
+              </View>
             </View>
+            </TouchableOpacity>
           ))}
         </View>
 

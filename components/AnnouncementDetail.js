@@ -5,7 +5,7 @@ import { useRoute } from '@react-navigation/native';
 import ImageModal from 'react-native-image-modal';
 import { Video, ResizeMode } from 'expo-av';
 import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
-
+import {fetchNewsData, fetchCollectionData} from '../FetchData'
 
 const { width, height } = Dimensions.get('window');
 const details_ad = __DEV__ ? TestIds.BANNER : 'ca-app-pub-6849324531484948/5918353464';
@@ -20,31 +20,38 @@ export default function AnnouncementDetail() {
   const [imageNum, setimageNum] = useState(0)
 
   const [announcemenetContent, setAnnouncemenetContent] = useState("");
+
   useEffect(() => {
-    fetch('https://collections.cronos.news/index.json')
-      .then((response) => response.json())
-      .then((data) => {
-        setCollection(data.filter(col => col.id === colid)[0]);
-      })
-      .catch((error) => console.log(error));
+    const fetchCollection = async () => {
+      try {
+        const collectionData = await fetchCollectionData();
+        setCollection(collectionData.filter(col => col.id === colid)[0]);
+      } catch (error) {
+        console.log(error)
+      }
+    };
+
+    fetchCollection();
   }, []);
   
 
   useEffect(() => {
-    if (collection) {
-    fetch(
-      `https://mellifluous-centaur-e6602b.netlify.app/news?id=${collection.id}&page=${apage}`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        const filteredData = data.filter((item) => item.id === annouid);
+    const fetchNews = async () => {
+      try {
+        const newsData = await fetchNewsData(collection.id, apage);
+        const filteredData = newsData.filter((item) => item.id === annouid);
         setData(filteredData);
         const content = convertNews(filteredData[0].content);
         setAnnouncemenetContent(content);
-      })
-      .catch((error) => console.error(error));
-    }
+
+      } catch (error) {
+        console.log(error)
+      }
+    };
+
+    if (collection) { fetchNews(); }
   }, [collection, apage]);
+
 
   function nextImage(){
     if(imageNum === data[0].media.length-1){return}

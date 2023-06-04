@@ -1,49 +1,4 @@
-import { View, Text, StyleSheet, Image, Linking, Dimensions, TouchableOpacity } from 'react-native'
-
-
-const timestampFormats = {
-    'D': { dateStyle: 'long' },
-    't': { timeStyle: 'short' },
-    'd': { dateStyle: 'short' },
-    'T': { timeStyle: 'medium' },
-    'R': { style: 'long', numeric: 'auto' },
-    'f': { dateStyle: 'long', timeStyle: 'short' },
-    'F': { dateStyle: 'full', timeStyle: 'short' },
-};
-
-function automaticRelativeDifference(timestamp) {
-    const diff = -((Date.now() - timestamp)/1000)|0;
-    const absDiff = Math.abs(diff);
-    if (absDiff > 86400*30*10) {
-        return { duration: Math.round(diff/(86400*365)), unit: 'years' };
-    }
-    if (absDiff > 86400*25) {
-        return { duration: Math.round(diff/(86400*30)), unit: 'months' };
-    }
-    if (absDiff > 3600*21) {
-        return { duration: Math.round(diff/86400), unit: 'days' };
-    }
-    if (absDiff > 60*44) {
-        return { duration: Math.round(diff/3600), unit: 'hours' };
-    }
-    if (absDiff > 30) {
-        return { duration: Math.round(diff/60), unit: 'minutes' };
-    }
-    return { duration: diff, unit: 'seconds' };
-}
-
-function convertTimestamp(type, timestamp) {
-    timestamp *= 1000;
-
-    if (type === 'R') {
-        const formatter = new Intl.RelativeTimeFormat(navigator.language || 'en', timestampFormats[type] || {});
-        const format = automaticRelativeDifference(timestamp);
-        return formatter.format(format.duration, format.unit);
-    }
-    
-    const formatter = new Intl.DateTimeFormat(navigator.language || 'en', timestampFormats[type] || {});
-    return formatter.format(new Date(timestamp));
-}
+import { View, Text, StyleSheet, Image, Linking } from 'react-native'
 
 
 function convertNewsNode(node) {
@@ -124,7 +79,7 @@ function convertNewsNode(node) {
     }
 
     if (node.type === 'timestamp') {
-        return <Text style={styles.timestamp} title={new Date(node.timestamp * 1000).toLocaleString()}>{convertTimestamp(node.format, node.timestamp)}</Text>;
+        return <Text style={styles.timestamp} title="use the website if you want better experience">{new Date(node.timestamp * 1000).toLocaleString()}</Text>;
     }
 
     if (node.content) {
