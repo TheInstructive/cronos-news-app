@@ -36,16 +36,11 @@ export default function App() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [navReady, setNavReady] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [initialRoute, setInitialRoute] = useState("Newsletter");
   const [dataAnnouncementID, setDataAnnouncementID] = useState();
   const [dataCollectionID, setDataCollectionID] = useState();
 
   useEffect(() => {
     messaging().onNotificationOpenedApp(remoteMessage => {
-      console.log('Notification caused app to open from background state:', remoteMessage.notification);
-      console.log(remoteMessage.data.announcementID)
-      console.log(remoteMessage.data.collectionID)
-      console.log(remoteMessage.messageId)
       setDataAnnouncementID(remoteMessage.data.announcementID)
       setDataCollectionID(remoteMessage.data.collectionID)
     });
@@ -54,9 +49,10 @@ export default function App() {
       .getInitialNotification()
       .then(remoteMessage => {
         if (remoteMessage) {
-          console.log('Notification caused app to open from quit state:', remoteMessage.notification);
-          setInitialRoute('AnnouncementDetail');
+          setDataAnnouncementID(remoteMessage.data.announcementID)
+          setDataCollectionID(remoteMessage.data.collectionID)
         }
+
         setLoading(false);
       });
     }, []);
@@ -92,7 +88,7 @@ export default function App() {
 
   return (
     <NavigationContainer onReady={() => setNavReady(true)} ref={navigationRef} theme={MyTheme}>
-      <Stack.Navigator initialRouteName={initialRoute}>
+      <Stack.Navigator>
         <Stack.Screen 
         name="Newsletter" 
         component={Newsletter} 
@@ -127,7 +123,7 @@ export default function App() {
         <Stack.Screen 
         name="AnnouncementDetail" 
         component={AnnouncementDetail} 
-        initialParams={{colid: 'default-slug', announcementID: 'announcement-id'}} 
+        initialParams={{colid: 'default-slug', annouid: 'announcement-id'}} 
         options={{
           headerTitle: (props) => <LogoTitle {...props} />,
           headerTitleAlign:'center',

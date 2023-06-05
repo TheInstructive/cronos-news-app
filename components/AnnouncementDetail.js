@@ -67,6 +67,10 @@ export default function AnnouncementDetail() {
     return item.timestamp ? new Date(item.timestamp).toLocaleString() : "-";
   }
 
+  if(!data){
+    return <View style={styles.loadingContainer}><Text style={styles.loadingText}>Loading...</Text></View>
+  }
+
 if(collection && data){
   return (
     <SafeAreaView style={styles.container}>
@@ -231,4 +235,19 @@ const styles = StyleSheet.create({
       color:'#fff',
       fontFamily:'bold',
   },
+
+  loadingContainer:{
+    width:width,
+    height:height,
+    display:'flex',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+
+  loadingText:{
+    textAlign:'center',
+    fontFamily:'bold',
+    color:'#002d74',
+    fontSize:20
+  }
 });
